@@ -1,0 +1,48 @@
+---
+title: "Mixing in Serpentine Channels"
+author: "Lina Kim"
+date: "July 21, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(VGAM)
+```
+
+```{r set.vals}
+# Examples given by paper
+n.range <- seq(from=-10,to=10,by=1)
+D <- 5*10^-6
+l <- 50*10^-6
+h <- 25*10^-6
+C0 <- 1
+t.upper <- 100
+t.lower <- 0
+t.mid <- 1
+```
+
+```{r functions}
+C <- function(t) {
+  C.x <- function(x) {
+    if (t==0) {
+      return(0.5*C0*sum(unlist(lapply(n.range, function(n) {
+        return(1)
+      }))))
+    }
+    0.5*C0*sum(unlist(lapply(n.range, function(n) {
+      erf((h+2*n*l-x)/(2*sqrt(D*t)))+erf((h-2*n*l+x)/(2*sqrt(D*t)))
+    })))
+  }
+  return(Vectorize(C.x))
+}
+
+mixing <- function() {
+#  return(1-integrate({abs(C(t.mid)-C(t.upper))},lower=0,upper=l)/integrate({abs(C(t.lower)-C(t.upper))},lower=0,upper=l))
+  return(1-abs(integrate(C(t.mid),lower=0,upper=l)$value-integrate(C(t.upper),lower=0,upper=l)$value)/abs(integrate(C(t.lower),lower=0,upper=l)$value-integrate(C(t.upper),lower=0,upper=l)$value))
+}
+```
+
+```{r run}
+mixing()
+```
